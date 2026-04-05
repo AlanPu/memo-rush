@@ -24,6 +24,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import top.alan.memorush.common.GameSelectionScreen
 import top.alan.memorush.game.GridMemoryGameScreen
+import top.alan.memorush.game.NBackGameScreen
 import top.alan.memorush.game.SimonSaysGameScreen
 import top.alan.memorush.model.GameType
 import top.alan.memorush.ui.theme.MemoRushTheme
@@ -84,6 +85,9 @@ fun AppNavigation(
                     SimonSaysGameScreen(
                         onBack = { navController.popBackStack() }
                     )
+                }
+                GameType.N_BACK -> {
+                    NBackGameScreen()
                 }
                 else -> {
                     GamePlaceholderScreen(

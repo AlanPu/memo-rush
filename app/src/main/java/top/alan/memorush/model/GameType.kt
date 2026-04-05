@@ -14,7 +14,7 @@ enum class GameType(
     ),
     N_BACK(
         displayName = "N-Back任务",
-        description = "判断当前刺激是否与N步前相同"
+        description = "判断当前项目是否与N步前相同"
     ),
     MISSING_ITEMS(
         displayName = "消失的物品",

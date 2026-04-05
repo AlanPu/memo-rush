@@ -246,7 +246,8 @@ class SimonSaysGameViewModelTest {
         
         val gameState = viewModel.gameState.value
         
-        if (gameState.colorSequence.size >= 2) {
+        if (gameState.colorSequence.size >= 2 && 
+            gameState.colorSequence[0] != gameState.colorSequence.last()) {
             viewModel.selectColor(gameState.colorSequence[0])
             
             val updatedState = viewModel.gameState.value

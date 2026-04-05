@@ -24,6 +24,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import top.alan.memorush.common.GameSelectionScreen
 import top.alan.memorush.game.GridMemoryGameScreen
+import top.alan.memorush.game.MissingItemsGameScreen
 import top.alan.memorush.game.NBackGameScreen
 import top.alan.memorush.game.SimonSaysGameScreen
 import top.alan.memorush.model.GameType
@@ -88,6 +89,9 @@ fun AppNavigation(
                 }
                 GameType.N_BACK -> {
                     NBackGameScreen()
+                }
+                GameType.MISSING_ITEMS -> {
+                    MissingItemsGameScreen()
                 }
                 else -> {
                     GamePlaceholderScreen(

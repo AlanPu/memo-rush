@@ -38,6 +38,7 @@ import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -47,9 +48,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -57,6 +61,20 @@ import top.alan.memorush.model.GamePhase
 import top.alan.memorush.model.NBackGameState
 import top.alan.memorush.model.NBackStimulus
 import top.alan.memorush.model.StimulusMode
+import top.alan.memorush.ui.theme.CardBackground
+import top.alan.memorush.ui.theme.DarkBackground
+import top.alan.memorush.ui.theme.ErrorRed
+import top.alan.memorush.ui.theme.GlowPink
+import top.alan.memorush.ui.theme.GlowPurple
+import top.alan.memorush.ui.theme.GradientEnd
+import top.alan.memorush.ui.theme.GradientMiddle
+import top.alan.memorush.ui.theme.GradientStart
+import top.alan.memorush.ui.theme.NeonCyan
+import top.alan.memorush.ui.theme.NeonPurple
+import top.alan.memorush.ui.theme.SuccessGreen
+import top.alan.memorush.ui.theme.TextMuted
+import top.alan.memorush.ui.theme.TextPrimary
+import top.alan.memorush.ui.theme.TextSecondary
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,25 +85,34 @@ fun NBackGameScreen(
     val gameState by viewModel.gameState.collectAsState()
     
     Scaffold(
+        containerColor = DarkBackground,
         topBar = {
             TopAppBar(
                 title = {
                     Text(
                         text = "N-Back 任务",
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            shadow = Shadow(
+                                color = NeonCyan.copy(alpha = 0.5f),
+                                offset = Offset(0f, 0f),
+                                blurRadius = 10f
+                            )
+                        )
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "返回"
+                            contentDescription = "返回",
+                            tint = TextPrimary
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    containerColor = DarkBackground,
+                    titleContentColor = TextPrimary
                 )
             )
         }
@@ -94,7 +121,16 @@ fun NBackGameScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(16.dp),
+                .padding(16.dp)
+                .background(
+                    Brush.radialGradient(
+                        colors = listOf(
+                            NeonPurple.copy(alpha = 0.1f),
+                            Color.Transparent
+                        ),
+                        radius = 800f
+                    )
+                ),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             when (gameState.gamePhase) {
@@ -139,7 +175,8 @@ private fun IdleContent(
     Text(
         text = "N-Back 任务",
         style = MaterialTheme.typography.headlineMedium,
-        fontWeight = FontWeight.Bold
+        fontWeight = FontWeight.Bold,
+        color = TextPrimary
     )
     
     Spacer(modifier = Modifier.height(8.dp))
@@ -147,15 +184,24 @@ private fun IdleContent(
     Text(
         text = "判断当前项目是否与 ${gameState.nLevel} 步前的项目相同",
         style = MaterialTheme.typography.bodyLarge,
-        color = MaterialTheme.colorScheme.onSurfaceVariant
+        color = TextSecondary
     )
     
     Spacer(modifier = Modifier.height(24.dp))
     
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(
+                width = 1.dp,
+                brush = Brush.linearGradient(
+                    colors = listOf(GlowPurple.copy(alpha = 0.3f), GlowPink.copy(alpha = 0.2f))
+                ),
+                shape = RoundedCornerShape(16.dp)
+            ),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = CardBackground
         )
     ) {
         Column(
@@ -164,7 +210,8 @@ private fun IdleContent(
         ) {
             Text(
                 text = "N 级别: ${gameState.nLevel}",
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleMedium,
+                color = NeonCyan
             )
             
             Slider(
@@ -172,14 +219,20 @@ private fun IdleContent(
                 onValueChange = { onNLevelChange(it.toInt()) },
                 valueRange = 1f..5f,
                 steps = 3,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = SliderDefaults.colors(
+                    thumbColor = NeonCyan,
+                    activeTrackColor = NeonCyan,
+                    inactiveTrackColor = NeonCyan.copy(alpha = 0.2f)
+                )
             )
             
             Spacer(modifier = Modifier.height(16.dp))
             
             Text(
                 text = "显示模式",
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleMedium,
+                color = NeonCyan
             )
             
             Spacer(modifier = Modifier.height(8.dp))
@@ -194,7 +247,13 @@ private fun IdleContent(
                             count = StimulusMode.entries.size
                         ),
                         onClick = { onModeChange(mode) },
-                        selected = gameState.stimulusMode == mode
+                        selected = gameState.stimulusMode == mode,
+                        colors = SegmentedButtonDefaults.colors(
+                            activeContainerColor = NeonCyan.copy(alpha = 0.2f),
+                            activeContentColor = NeonCyan,
+                            inactiveContainerColor = CardBackground,
+                            inactiveContentColor = TextSecondary
+                        )
                     ) {
                         Text(
                             when (mode) {
@@ -211,7 +270,8 @@ private fun IdleContent(
             
             Text(
                 text = "试验次数: ${gameState.totalTrials}",
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleMedium,
+                color = NeonCyan
             )
             
             Slider(
@@ -219,21 +279,22 @@ private fun IdleContent(
                 onValueChange = { onTrialsChange(it.toInt()) },
                 valueRange = 10f..50f,
                 steps = 7,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = SliderDefaults.colors(
+                    thumbColor = NeonCyan,
+                    activeTrackColor = NeonCyan,
+                    inactiveTrackColor = NeonCyan.copy(alpha = 0.2f)
+                )
             )
         }
     }
     
     Spacer(modifier = Modifier.height(24.dp))
     
-    Button(
+    CyberButton(
         onClick = onStartGame,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp)
-    ) {
-        Text("开始游戏", fontSize = 18.sp)
-    }
+        text = "开始游戏"
+    )
 }
 
 @Composable
@@ -248,12 +309,13 @@ private fun ColumnScope.GameContent(
     ) {
         Text(
             text = "N = ${gameState.nLevel}",
-            style = MaterialTheme.typography.titleMedium
+            style = MaterialTheme.typography.titleMedium,
+            color = TextSecondary
         )
         Text(
             text = "得分: ${gameState.score}",
             style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary
+            color = NeonCyan
         )
     }
     
@@ -267,7 +329,7 @@ private fun ColumnScope.GameContent(
     Text(
         text = "${gameState.currentTrial + 1} / ${gameState.totalTrials}",
         style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant
+        color = TextMuted
     )
     
     Spacer(modifier = Modifier.height(32.dp))
@@ -308,12 +370,14 @@ private fun ColumnScope.GameContent(
             modifier = Modifier
                 .weight(1f)
                 .height(64.dp),
+            shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary
+                containerColor = NeonCyan.copy(alpha = 0.2f),
+                contentColor = NeonCyan
             ),
             enabled = gameState.currentStimulus != null
         ) {
-            Text("匹配", fontSize = 18.sp)
+            Text("匹配", fontSize = 18.sp, fontWeight = FontWeight.Bold)
         }
         
         Button(
@@ -321,12 +385,14 @@ private fun ColumnScope.GameContent(
             modifier = Modifier
                 .weight(1f)
                 .height(64.dp),
+            shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.secondary
+                containerColor = GlowPurple.copy(alpha = 0.2f),
+                contentColor = GlowPurple
             ),
             enabled = gameState.currentStimulus != null
         ) {
-            Text("不匹配", fontSize = 18.sp)
+            Text("不匹配", fontSize = 18.sp, fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -339,10 +405,10 @@ private fun LetterStimulusDisplay(
 ) {
     val backgroundColor by animateColorAsState(
         targetValue = when {
-            showFeedback && isCorrect == true -> Color(0xFF4CAF50).copy(alpha = 0.3f)
-            showFeedback && isCorrect == false -> Color(0xFFF44336).copy(alpha = 0.3f)
+            showFeedback && isCorrect == true -> SuccessGreen.copy(alpha = 0.3f)
+            showFeedback && isCorrect == false -> ErrorRed.copy(alpha = 0.3f)
             stimulus != null -> stimulus.color.copy(alpha = 0.2f)
-            else -> MaterialTheme.colorScheme.surfaceVariant
+            else -> CardBackground
         },
         animationSpec = tween(300, easing = FastOutSlowInEasing),
         label = "bg_color"
@@ -355,7 +421,9 @@ private fun LetterStimulusDisplay(
             .background(backgroundColor)
             .border(
                 width = 2.dp,
-                color = stimulus?.color ?: MaterialTheme.colorScheme.outline,
+                brush = Brush.linearGradient(
+                    colors = listOf(stimulus?.color ?: NeonCyan, NeonPurple)
+                ),
                 shape = RoundedCornerShape(16.dp)
             ),
         contentAlignment = Alignment.Center
@@ -370,7 +438,7 @@ private fun LetterStimulusDisplay(
         } else {
             CircularProgressIndicator(
                 modifier = Modifier.size(48.dp),
-                color = MaterialTheme.colorScheme.primary
+                color = NeonCyan
             )
         }
     }
@@ -384,9 +452,9 @@ private fun PositionStimulusDisplay(
 ) {
     val gridColor by animateColorAsState(
         targetValue = when {
-            showFeedback && isCorrect == true -> Color(0xFF4CAF50).copy(alpha = 0.3f)
-            showFeedback && isCorrect == false -> Color(0xFFF44336).copy(alpha = 0.3f)
-            else -> MaterialTheme.colorScheme.surfaceVariant
+            showFeedback && isCorrect == true -> SuccessGreen.copy(alpha = 0.3f)
+            showFeedback && isCorrect == false -> ErrorRed.copy(alpha = 0.3f)
+            else -> CardBackground
         },
         animationSpec = tween(300, easing = FastOutSlowInEasing),
         label = "grid_color"
@@ -403,16 +471,17 @@ private fun PositionStimulusDisplay(
             modifier = Modifier
                 .aspectRatio(1f)
                 .clip(RoundedCornerShape(16.dp))
-                .background(gridColor),
+                .background(gridColor)
+                .border(1.dp, NeonCyan.copy(alpha = 0.3f), RoundedCornerShape(16.dp)),
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             items(9) { index ->
                 val isHighlighted = position == index
                 val cellColor = if (isHighlighted) {
-                    MaterialTheme.colorScheme.primary
+                    NeonCyan
                 } else {
-                    MaterialTheme.colorScheme.surface
+                    CardBackground
                 }
                 
                 Box(
@@ -435,9 +504,9 @@ private fun DualStimulusDisplay(
 ) {
     val gridColor by animateColorAsState(
         targetValue = when {
-            showFeedback && isCorrect == true -> Color(0xFF4CAF50).copy(alpha = 0.3f)
-            showFeedback && isCorrect == false -> Color(0xFFF44336).copy(alpha = 0.3f)
-            else -> MaterialTheme.colorScheme.surfaceVariant
+            showFeedback && isCorrect == true -> SuccessGreen.copy(alpha = 0.3f)
+            showFeedback && isCorrect == false -> ErrorRed.copy(alpha = 0.3f)
+            else -> CardBackground
         },
         animationSpec = tween(300, easing = FastOutSlowInEasing),
         label = "grid_color"
@@ -454,7 +523,8 @@ private fun DualStimulusDisplay(
             modifier = Modifier
                 .aspectRatio(1f)
                 .clip(RoundedCornerShape(16.dp))
-                .background(gridColor),
+                .background(gridColor)
+                .border(1.dp, NeonCyan.copy(alpha = 0.3f), RoundedCornerShape(16.dp)),
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
@@ -463,7 +533,7 @@ private fun DualStimulusDisplay(
                 val cellColor = if (isHighlighted && stimulus != null) {
                     stimulus.color
                 } else {
-                    MaterialTheme.colorScheme.surface
+                    CardBackground
                 }
                 
                 Box(
@@ -503,15 +573,30 @@ private fun GameOverContent(
     Text(
         text = "游戏结束",
         style = MaterialTheme.typography.headlineMedium,
-        fontWeight = FontWeight.Bold
+        fontWeight = FontWeight.Bold,
+        color = TextPrimary
     )
     
     Spacer(modifier = Modifier.height(24.dp))
     
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = 12.dp,
+                shape = RoundedCornerShape(20.dp),
+                spotColor = NeonCyan.copy(alpha = 0.3f)
+            )
+            .border(
+                width = 1.dp,
+                brush = Brush.linearGradient(
+                    colors = listOf(NeonCyan.copy(alpha = 0.5f), GlowPurple.copy(alpha = 0.3f))
+                ),
+                shape = RoundedCornerShape(20.dp)
+            ),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
+            containerColor = CardBackground
         )
     ) {
         Column(
@@ -522,14 +607,15 @@ private fun GameOverContent(
         ) {
             Text(
                 text = "最终得分",
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleMedium,
+                color = TextMuted
             )
             
             Text(
                 text = "${gameState.score}",
                 style = MaterialTheme.typography.displayLarge,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
+                color = NeonCyan
             )
             
             Spacer(modifier = Modifier.height(16.dp))
@@ -542,12 +628,13 @@ private fun GameOverContent(
                     Text(
                         text = "正确率",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = TextMuted
                     )
                     Text(
                         text = "$accuracy%",
                         style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = NeonCyan
                     )
                 }
                 
@@ -555,12 +642,13 @@ private fun GameOverContent(
                     Text(
                         text = "N 级别",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = TextMuted
                     )
                     Text(
                         text = "${gameState.nLevel}",
                         style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = GlowPurple
                     )
                 }
             }
@@ -575,13 +663,13 @@ private fun GameOverContent(
                     Text(
                         text = "正确次数",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = TextMuted
                     )
                     Text(
                         text = "${gameState.correctResponses}",
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF4CAF50)
+                        color = SuccessGreen
                     )
                 }
                 
@@ -589,12 +677,13 @@ private fun GameOverContent(
                     Text(
                         text = "总响应次数",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = TextMuted
                     )
                     Text(
                         text = "${gameState.totalResponses}",
                         style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = TextPrimary
                     )
                 }
             }
@@ -611,19 +700,20 @@ private fun GameOverContent(
             onClick = onBack,
             modifier = Modifier
                 .weight(1f)
-                .height(56.dp)
+                .height(56.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = ButtonDefaults.outlinedButtonColors(
+                contentColor = TextSecondary
+            )
         ) {
             Text("返回主界面", fontSize = 16.sp)
         }
         
-        Button(
+        CyberButton(
             onClick = onRestart,
-            modifier = Modifier
-                .weight(1f)
-                .height(56.dp)
-        ) {
-            Text("再玩一次", fontSize = 16.sp)
-        }
+            text = "再玩一次",
+            modifier = Modifier.weight(1f)
+        )
     }
 }
 
@@ -636,13 +726,59 @@ private fun LinearProgressIndicator(
         modifier = modifier
             .height(8.dp)
             .clip(RoundedCornerShape(4.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .background(CardBackground)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth(progress())
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.primary)
+                .background(
+                    Brush.linearGradient(
+                        colors = listOf(NeonCyan, GlowPurple)
+                    )
+                )
         )
+    }
+}
+
+@Composable
+private fun CyberButton(
+    onClick: () -> Unit,
+    text: String,
+    modifier: Modifier = Modifier
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .shadow(
+                elevation = 12.dp,
+                shape = RoundedCornerShape(16.dp),
+                spotColor = NeonCyan.copy(alpha = 0.4f)
+            ),
+        shape = RoundedCornerShape(16.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color.Transparent
+        ),
+        contentPadding = ButtonDefaults.ContentPadding
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.linearGradient(
+                        colors = listOf(GradientStart, GradientMiddle, GradientEnd)
+                    )
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = text,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+        }
     }
 }

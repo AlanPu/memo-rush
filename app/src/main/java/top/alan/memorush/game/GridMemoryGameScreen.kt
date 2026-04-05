@@ -1,5 +1,15 @@
 package top.alan.memorush.game
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,6 +22,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
@@ -26,6 +37,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -35,7 +47,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -44,6 +61,25 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import top.alan.memorush.model.GamePhase
 import top.alan.memorush.model.GameState
 import top.alan.memorush.model.GridCell
+import top.alan.memorush.ui.theme.CardBackground
+import top.alan.memorush.ui.theme.CardBorder
+import top.alan.memorush.ui.theme.DarkBackground
+import top.alan.memorush.ui.theme.ErrorRed
+import top.alan.memorush.ui.theme.GlowCyan
+import top.alan.memorush.ui.theme.GlowPink
+import top.alan.memorush.ui.theme.GlowPurple
+import top.alan.memorush.ui.theme.GradientEnd
+import top.alan.memorush.ui.theme.GradientMiddle
+import top.alan.memorush.ui.theme.GradientStart
+import top.alan.memorush.ui.theme.NeonCyan
+import top.alan.memorush.ui.theme.NeonGreen
+import top.alan.memorush.ui.theme.NeonOrange
+import top.alan.memorush.ui.theme.NeonPurple
+import top.alan.memorush.ui.theme.SuccessGreen
+import top.alan.memorush.ui.theme.TextMuted
+import top.alan.memorush.ui.theme.TextPrimary
+import top.alan.memorush.ui.theme.TextSecondary
+import top.alan.memorush.ui.theme.WarningOrange
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,25 +90,34 @@ fun GridMemoryGameScreen(
     val gameState by viewModel.gameState.collectAsState()
     
     Scaffold(
+        containerColor = DarkBackground,
         topBar = {
             TopAppBar(
                 title = {
                     Text(
                         text = "网格记忆游戏",
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            shadow = Shadow(
+                                color = NeonCyan.copy(alpha = 0.5f),
+                                offset = Offset(0f, 0f),
+                                blurRadius = 10f
+                            )
+                        )
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "返回"
+                            contentDescription = "返回",
+                            tint = TextPrimary
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    containerColor = DarkBackground,
+                    titleContentColor = TextPrimary
                 )
             )
         }
@@ -81,6 +126,15 @@ fun GridMemoryGameScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .background(
+                    Brush.radialGradient(
+                        colors = listOf(
+                            NeonPurple.copy(alpha = 0.1f),
+                            Color.Transparent
+                        ),
+                        radius = 800f
+                    )
+                )
         ) {
             when (gameState.gamePhase) {
                 GamePhase.GAME_OVER -> {
@@ -167,9 +221,23 @@ private fun GameContent(
 @Composable
 private fun GameInfoSection(gameState: GameState) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = 8.dp,
+                shape = RoundedCornerShape(16.dp),
+                spotColor = NeonCyan.copy(alpha = 0.2f)
+            )
+            .border(
+                width = 1.dp,
+                brush = Brush.linearGradient(
+                    colors = listOf(NeonCyan.copy(alpha = 0.3f), NeonPurple.copy(alpha = 0.2f))
+                ),
+                shape = RoundedCornerShape(16.dp)
+            ),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer
+            containerColor = CardBackground
         )
     ) {
         Row(
@@ -207,14 +275,14 @@ private fun InfoItem(
         Text(
             text = label,
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
+            color = TextMuted
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
             text = value,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSecondaryContainer
+            color = NeonCyan
         )
     }
 }
@@ -230,22 +298,23 @@ private fun GameStatusMessage(gamePhase: GamePhase) {
     }
     
     val backgroundColor = when (gamePhase) {
-        GamePhase.IDLE -> MaterialTheme.colorScheme.surfaceVariant
-        GamePhase.SHOWING_SEQUENCE -> MaterialTheme.colorScheme.tertiaryContainer
-        GamePhase.USER_INPUT -> MaterialTheme.colorScheme.primaryContainer
-        GamePhase.LEVEL_COMPLETE -> Color(0xFF4CAF50)
-        GamePhase.GAME_OVER -> MaterialTheme.colorScheme.errorContainer
+        GamePhase.IDLE -> CardBackground
+        GamePhase.SHOWING_SEQUENCE -> NeonPurple.copy(alpha = 0.2f)
+        GamePhase.USER_INPUT -> NeonCyan.copy(alpha = 0.2f)
+        GamePhase.LEVEL_COMPLETE -> SuccessGreen.copy(alpha = 0.2f)
+        GamePhase.GAME_OVER -> ErrorRed.copy(alpha = 0.2f)
     }
     
     val textColor = when (gamePhase) {
-        GamePhase.IDLE -> MaterialTheme.colorScheme.onSurfaceVariant
-        GamePhase.SHOWING_SEQUENCE -> MaterialTheme.colorScheme.onTertiaryContainer
-        GamePhase.USER_INPUT -> MaterialTheme.colorScheme.onPrimaryContainer
-        GamePhase.LEVEL_COMPLETE -> Color.White
-        GamePhase.GAME_OVER -> MaterialTheme.colorScheme.onErrorContainer
+        GamePhase.IDLE -> TextSecondary
+        GamePhase.SHOWING_SEQUENCE -> GlowPurple
+        GamePhase.USER_INPUT -> NeonCyan
+        GamePhase.LEVEL_COMPLETE -> SuccessGreen
+        GamePhase.GAME_OVER -> ErrorRed
     }
     
     Card(
+        shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = backgroundColor)
     ) {
         Column(
@@ -263,7 +332,7 @@ private fun GameStatusMessage(gamePhase: GamePhase) {
             Text(
                 text = subMessage,
                 style = MaterialTheme.typography.bodySmall,
-                color = textColor.copy(alpha = 0.8f),
+                color = textColor.copy(alpha = 0.7f),
                 textAlign = TextAlign.Center
             )
         }
@@ -299,8 +368,9 @@ private fun GameActionButtons(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp),
+                    shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.outlinedButtonColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                        contentColor = TextSecondary
                     )
                 ) {
                     Text(
@@ -310,33 +380,17 @@ private fun GameActionButtons(
                     )
                 }
                 
-                Button(
+                CyberButton(
                     onClick = onStartGame,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                ) {
-                    Text(
-                        text = "开始游戏",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+                    text = "开始游戏"
+                )
             }
         }
         GamePhase.LEVEL_COMPLETE -> {
-            Button(
+            CyberButton(
                 onClick = onNextLevel,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-            ) {
-                Text(
-                    text = "下一关",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+                text = "下一关"
+            )
         }
         else -> {
             Spacer(modifier = Modifier.height(56.dp))
@@ -352,9 +406,18 @@ private fun SettingsCard(
     onShowDistractorsChanged: (Boolean) -> Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(
+                width = 1.dp,
+                brush = Brush.linearGradient(
+                    colors = listOf(GlowPurple.copy(alpha = 0.3f), GlowPink.copy(alpha = 0.2f))
+                ),
+                shape = RoundedCornerShape(16.dp)
+            ),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer
+            containerColor = CardBackground
         )
     ) {
         Column(
@@ -366,7 +429,7 @@ private fun SettingsCard(
                 text = "游戏规则",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSecondaryContainer
+                color = GlowPurple
             )
             
             Spacer(modifier = Modifier.height(8.dp))
@@ -378,7 +441,7 @@ private fun SettingsCard(
                        "4. 选对所有格子即可过关\n" +
                        "5. 选错格子则游戏结束",
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.8f),
+                color = TextSecondary,
                 lineHeight = 20.sp
             )
             
@@ -388,7 +451,7 @@ private fun SettingsCard(
                 text = "游戏设置",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSecondaryContainer
+                color = GlowPurple
             )
             
             Spacer(modifier = Modifier.height(12.dp))
@@ -396,7 +459,7 @@ private fun SettingsCard(
             Text(
                 text = "网格大小",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
+                color = TextMuted
             )
             
             Spacer(modifier = Modifier.height(8.dp))
@@ -439,18 +502,22 @@ private fun SettingsCard(
                         text = "干扰项模式",
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                        color = TextPrimary
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = "开启后会出现黄色干扰格子",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.6f)
+                        color = TextMuted
                     )
                 }
                 Switch(
                     checked = showDistractors,
-                    onCheckedChange = onShowDistractorsChanged
+                    onCheckedChange = onShowDistractorsChanged,
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = NeonCyan,
+                        checkedTrackColor = NeonCyan.copy(alpha = 0.3f)
+                    )
                 )
             }
         }
@@ -470,13 +537,18 @@ private fun RowScope.GridSizeOption(
     ) {
         RadioButton(
             selected = isSelected,
-            onClick = onClick
+            onClick = onClick,
+            colors = androidx.compose.material3.RadioButtonDefaults.colors(
+                selectedColor = NeonCyan,
+                unselectedColor = TextMuted
+            )
         )
         Spacer(modifier = Modifier.width(4.dp))
         Text(
             text = label,
             style = MaterialTheme.typography.bodyLarge,
-            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+            color = if (isSelected) NeonCyan else TextSecondary
         )
     }
 }
@@ -495,9 +567,23 @@ private fun GameOverContent(
         verticalArrangement = Arrangement.Center
     ) {
         Card(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .shadow(
+                    elevation = 16.dp,
+                    shape = RoundedCornerShape(20.dp),
+                    spotColor = ErrorRed.copy(alpha = 0.3f)
+                )
+                .border(
+                    width = 1.dp,
+                    brush = Brush.linearGradient(
+                        colors = listOf(ErrorRed.copy(alpha = 0.5f), NeonOrange.copy(alpha = 0.3f))
+                    ),
+                    shape = RoundedCornerShape(20.dp)
+                ),
+            shape = RoundedCornerShape(20.dp),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.errorContainer
+                containerColor = CardBackground
             )
         ) {
             Column(
@@ -510,7 +596,7 @@ private fun GameOverContent(
                     text = "游戏结束",
                     style = MaterialTheme.typography.headlineLarge,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onErrorContainer
+                    color = ErrorRed
                 )
                 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -518,7 +604,7 @@ private fun GameOverContent(
                 Text(
                     text = "最终成绩",
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.7f)
+                    color = TextMuted
                 )
                 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -527,7 +613,7 @@ private fun GameOverContent(
                     text = "Level ${gameState.currentLevel}",
                     style = MaterialTheme.typography.displayMedium,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onErrorContainer
+                    color = NeonCyan
                 )
                 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -535,25 +621,17 @@ private fun GameOverContent(
                 Text(
                     text = "成功记忆了 ${gameState.flashCount - 1} 个格子",
                     style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.8f)
+                    color = TextSecondary
                 )
             }
         }
         
         Spacer(modifier = Modifier.height(32.dp))
         
-        Button(
+        CyberButton(
             onClick = onRetry,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp)
-        ) {
-            Text(
-                text = "重试",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
+            text = "重试"
+        )
         
         Spacer(modifier = Modifier.height(16.dp))
         
@@ -563,7 +641,49 @@ private fun GameOverContent(
         ) {
             Text(
                 text = "返回游戏选择",
-                fontSize = 16.sp
+                fontSize = 16.sp,
+                color = TextSecondary
+            )
+        }
+    }
+}
+
+@Composable
+private fun CyberButton(
+    onClick: () -> Unit,
+    text: String
+) {
+    Button(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .shadow(
+                elevation = 12.dp,
+                shape = RoundedCornerShape(16.dp),
+                spotColor = NeonCyan.copy(alpha = 0.4f)
+            ),
+        shape = RoundedCornerShape(16.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color.Transparent
+        ),
+        contentPadding = ButtonDefaults.ContentPadding
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.linearGradient(
+                        colors = listOf(GradientStart, GradientMiddle, GradientEnd)
+                    )
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = text,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
             )
         }
     }

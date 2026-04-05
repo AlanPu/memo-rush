@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,7 +34,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -42,7 +45,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -51,6 +58,21 @@ import top.alan.memorush.model.GamePhase
 import top.alan.memorush.model.StroopColor
 import top.alan.memorush.model.StroopTaskGameState
 import top.alan.memorush.model.StroopTrial
+import top.alan.memorush.ui.theme.CardBackground
+import top.alan.memorush.ui.theme.DarkBackground
+import top.alan.memorush.ui.theme.ErrorRed
+import top.alan.memorush.ui.theme.GlowPink
+import top.alan.memorush.ui.theme.GlowPurple
+import top.alan.memorush.ui.theme.GradientEnd
+import top.alan.memorush.ui.theme.GradientMiddle
+import top.alan.memorush.ui.theme.GradientStart
+import top.alan.memorush.ui.theme.NeonCyan
+import top.alan.memorush.ui.theme.NeonPurple
+import top.alan.memorush.ui.theme.SuccessGreen
+import top.alan.memorush.ui.theme.TextMuted
+import top.alan.memorush.ui.theme.TextPrimary
+import top.alan.memorush.ui.theme.TextSecondary
+import top.alan.memorush.ui.theme.WarningOrange
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -61,25 +83,34 @@ fun StroopTaskGameScreen(
     val gameState by viewModel.gameState.collectAsState()
     
     Scaffold(
+        containerColor = DarkBackground,
         topBar = {
             TopAppBar(
                 title = {
                     Text(
                         text = "斯特鲁普任务",
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            shadow = Shadow(
+                                color = NeonCyan.copy(alpha = 0.5f),
+                                offset = Offset(0f, 0f),
+                                blurRadius = 10f
+                            )
+                        )
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "返回"
+                            contentDescription = "返回",
+                            tint = TextPrimary
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    containerColor = DarkBackground,
+                    titleContentColor = TextPrimary
                 )
             )
         }
@@ -88,7 +119,16 @@ fun StroopTaskGameScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(16.dp),
+                .padding(16.dp)
+                .background(
+                    Brush.radialGradient(
+                        colors = listOf(
+                            NeonPurple.copy(alpha = 0.1f),
+                            Color.Transparent
+                        ),
+                        radius = 800f
+                    )
+                ),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             when (gameState.gamePhase) {
@@ -139,7 +179,8 @@ private fun IdleContent(
     Text(
         text = "斯特鲁普任务",
         style = MaterialTheme.typography.headlineMedium,
-        fontWeight = FontWeight.Bold
+        fontWeight = FontWeight.Bold,
+        color = TextPrimary
     )
     
     Spacer(modifier = Modifier.height(8.dp))
@@ -147,15 +188,24 @@ private fun IdleContent(
     Text(
         text = "报告词语的字体颜色，忽略词语含义",
         style = MaterialTheme.typography.bodyLarge,
-        color = MaterialTheme.colorScheme.onSurfaceVariant
+        color = TextSecondary
     )
     
     Spacer(modifier = Modifier.height(24.dp))
     
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(
+                width = 1.dp,
+                brush = Brush.linearGradient(
+                    colors = listOf(GlowPurple.copy(alpha = 0.3f), GlowPink.copy(alpha = 0.2f))
+                ),
+                shape = RoundedCornerShape(16.dp)
+            ),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = CardBackground
         )
     ) {
         Column(
@@ -165,7 +215,8 @@ private fun IdleContent(
             Text(
                 text = "游戏规则",
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = GlowPurple
             )
             
             Spacer(modifier = Modifier.height(12.dp))
@@ -173,7 +224,7 @@ private fun IdleContent(
             Text(
                 text = "• 屏幕会显示一个颜色词语\n• 词语的字体颜色可能与含义不同\n• 选择词语的【字体颜色】而非含义\n• 越快回答得分越高",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = TextSecondary
             )
         }
     }
@@ -181,9 +232,18 @@ private fun IdleContent(
     Spacer(modifier = Modifier.height(16.dp))
     
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(
+                width = 1.dp,
+                brush = Brush.linearGradient(
+                    colors = listOf(NeonCyan.copy(alpha = 0.3f), NeonPurple.copy(alpha = 0.2f))
+                ),
+                shape = RoundedCornerShape(16.dp)
+            ),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = CardBackground
         )
     ) {
         Column(
@@ -192,7 +252,8 @@ private fun IdleContent(
         ) {
             Text(
                 text = "时间限制: ${(gameState.timeLimit / 1000.0).toString().substring(0, 3)} 秒",
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleMedium,
+                color = NeonCyan
             )
             
             Slider(
@@ -200,14 +261,20 @@ private fun IdleContent(
                 onValueChange = { onTimeLimitChange(it.toLong()) },
                 valueRange = 1500f..5000f,
                 steps = 6,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = SliderDefaults.colors(
+                    thumbColor = NeonCyan,
+                    activeTrackColor = NeonCyan,
+                    inactiveTrackColor = NeonCyan.copy(alpha = 0.2f)
+                )
             )
             
             Spacer(modifier = Modifier.height(16.dp))
             
             Text(
                 text = "每关题数: ${gameState.totalTrials}",
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleMedium,
+                color = NeonCyan
             )
             
             Slider(
@@ -215,21 +282,22 @@ private fun IdleContent(
                 onValueChange = { onTotalTrialsChange(it.toInt()) },
                 valueRange = 5f..20f,
                 steps = 14,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = SliderDefaults.colors(
+                    thumbColor = NeonCyan,
+                    activeTrackColor = NeonCyan,
+                    inactiveTrackColor = NeonCyan.copy(alpha = 0.2f)
+                )
             )
         }
     }
     
     Spacer(modifier = Modifier.height(24.dp))
     
-    Button(
+    CyberButton(
         onClick = onStartGame,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp)
-    ) {
-        Text("开始游戏", fontSize = 18.sp)
-    }
+        text = "开始游戏"
+    )
 }
 
 @Composable
@@ -243,12 +311,13 @@ private fun ColumnScope.GameContent(
     ) {
         Text(
             text = "关卡 ${gameState.currentLevel}",
-            style = MaterialTheme.typography.titleMedium
+            style = MaterialTheme.typography.titleMedium,
+            color = TextSecondary
         )
         Text(
             text = "得分: ${gameState.score}",
             style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary
+            color = NeonCyan
         )
     }
     
@@ -261,7 +330,7 @@ private fun ColumnScope.GameContent(
         Text(
             text = "题目 ${gameState.currentTrial} / ${gameState.totalTrials}",
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = TextMuted
         )
         
         Row(
@@ -270,12 +339,12 @@ private fun ColumnScope.GameContent(
             Text(
                 text = "正确: ${gameState.correctCount}",
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.primary
+                color = SuccessGreen
             )
             Text(
                 text = "错误: ${gameState.wrongCount}",
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.error
+                color = ErrorRed
             )
         }
     }
@@ -289,13 +358,13 @@ private fun ColumnScope.GameContent(
             .height(8.dp)
             .clip(RoundedCornerShape(4.dp)),
         color = if (gameState.remainingTime > gameState.timeLimit / 2) {
-            MaterialTheme.colorScheme.primary
+            NeonCyan
         } else if (gameState.remainingTime > gameState.timeLimit / 4) {
-            Color(0xFFFFA000)
+            WarningOrange
         } else {
-            MaterialTheme.colorScheme.error
+            ErrorRed
         },
-        trackColor = MaterialTheme.colorScheme.surfaceVariant
+        trackColor = CardBackground
     )
     
     Spacer(modifier = Modifier.weight(1f))
@@ -304,7 +373,7 @@ private fun ColumnScope.GameContent(
         Text(
             text = "选择字体颜色",
             style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = TextSecondary
         )
         
         Spacer(modifier = Modifier.height(24.dp))
@@ -335,7 +404,14 @@ private fun StroopWordDisplay(
             .fillMaxWidth()
             .height(120.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant),
+            .background(CardBackground)
+            .border(
+                width = 1.dp,
+                brush = Brush.linearGradient(
+                    colors = listOf(NeonCyan.copy(alpha = 0.3f), NeonPurple.copy(alpha = 0.2f))
+                ),
+                shape = RoundedCornerShape(16.dp)
+            ),
         contentAlignment = Alignment.Center
     ) {
         Text(
@@ -354,8 +430,8 @@ private fun StroopWordDisplay(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(
-                        if (isCorrect) Color.Green.copy(alpha = 0.3f)
-                        else Color.Red.copy(alpha = 0.3f)
+                        if (isCorrect) SuccessGreen.copy(alpha = 0.3f)
+                        else ErrorRed.copy(alpha = 0.3f)
                     ),
                 contentAlignment = Alignment.Center
             ) {
@@ -363,7 +439,7 @@ private fun StroopWordDisplay(
                     text = if (isCorrect) "✓" else "✗",
                     fontSize = 72.sp,
                     fontWeight = FontWeight.Bold,
-                    color = if (isCorrect) Color.Green else Color.Red
+                    color = if (isCorrect) SuccessGreen else ErrorRed
                 )
             }
         }
@@ -441,7 +517,7 @@ private fun ColumnScope.FeedbackContent(
         Text(
             text = "题目 ${gameState.currentTrial} / ${gameState.totalTrials}",
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = TextMuted
         )
         
         Spacer(modifier = Modifier.weight(1f))
@@ -456,8 +532,9 @@ private fun ColumnScope.FeedbackContent(
         
         if (!gameState.lastAnswerCorrect) {
             Card(
+                shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.errorContainer
+                    containerColor = ErrorRed.copy(alpha = 0.2f)
                 )
             ) {
                 Column(
@@ -466,7 +543,8 @@ private fun ColumnScope.FeedbackContent(
                 ) {
                     Text(
                         text = "正确答案",
-                        style = MaterialTheme.typography.titleSmall
+                        style = MaterialTheme.typography.titleSmall,
+                        color = TextSecondary
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Row(
@@ -482,7 +560,8 @@ private fun ColumnScope.FeedbackContent(
                         Text(
                             text = trial.wordColor.displayName,
                             style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            color = TextPrimary
                         )
                     }
                 }
@@ -500,15 +579,29 @@ private fun LevelCompleteContent(
         text = "关卡完成！",
         style = MaterialTheme.typography.headlineMedium,
         fontWeight = FontWeight.Bold,
-        color = MaterialTheme.colorScheme.primary
+        color = NeonCyan
     )
     
     Spacer(modifier = Modifier.height(24.dp))
     
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = 12.dp,
+                shape = RoundedCornerShape(20.dp),
+                spotColor = NeonCyan.copy(alpha = 0.3f)
+            )
+            .border(
+                width = 1.dp,
+                brush = Brush.linearGradient(
+                    colors = listOf(NeonCyan.copy(alpha = 0.5f), GlowPurple.copy(alpha = 0.3f))
+                ),
+                shape = RoundedCornerShape(20.dp)
+            ),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
+            containerColor = CardBackground
         )
     ) {
         Column(
@@ -519,14 +612,15 @@ private fun LevelCompleteContent(
         ) {
             Text(
                 text = "得分",
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleMedium,
+                color = TextMuted
             )
             
             Text(
                 text = "${gameState.score}",
                 style = MaterialTheme.typography.displayLarge,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
+                color = NeonCyan
             )
             
             Spacer(modifier = Modifier.height(16.dp))
@@ -538,13 +632,13 @@ private fun LevelCompleteContent(
                     Text(
                         text = "正确",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = TextMuted
                     )
                     Text(
                         text = "${gameState.correctCount}",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
+                        color = SuccessGreen
                     )
                 }
                 
@@ -552,13 +646,13 @@ private fun LevelCompleteContent(
                     Text(
                         text = "错误",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = TextMuted
                     )
                     Text(
                         text = "${gameState.wrongCount}",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.error
+                        color = ErrorRed
                     )
                 }
                 
@@ -566,13 +660,13 @@ private fun LevelCompleteContent(
                     Text(
                         text = "正确率",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = TextMuted
                     )
                     Text(
                         text = "${(gameState.correctCount.toFloat() / gameState.totalTrials * 100).toInt()}%",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.secondary
+                        color = GlowPurple
                     )
                 }
             }
@@ -581,14 +675,10 @@ private fun LevelCompleteContent(
     
     Spacer(modifier = Modifier.height(24.dp))
     
-    Button(
+    CyberButton(
         onClick = onNextLevel,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp)
-    ) {
-        Text("下一关", fontSize = 18.sp)
-    }
+        text = "下一关"
+    )
 }
 
 @Composable
@@ -600,15 +690,30 @@ private fun GameOverContent(
     Text(
         text = "游戏结束",
         style = MaterialTheme.typography.headlineMedium,
-        fontWeight = FontWeight.Bold
+        fontWeight = FontWeight.Bold,
+        color = TextPrimary
     )
     
     Spacer(modifier = Modifier.height(24.dp))
     
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = 16.dp,
+                shape = RoundedCornerShape(20.dp),
+                spotColor = ErrorRed.copy(alpha = 0.3f)
+            )
+            .border(
+                width = 1.dp,
+                brush = Brush.linearGradient(
+                    colors = listOf(ErrorRed.copy(alpha = 0.5f), GlowPink.copy(alpha = 0.3f))
+                ),
+                shape = RoundedCornerShape(20.dp)
+            ),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.errorContainer
+            containerColor = CardBackground
         )
     ) {
         Column(
@@ -619,21 +724,23 @@ private fun GameOverContent(
         ) {
             Text(
                 text = "最终得分",
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleMedium,
+                color = TextMuted
             )
             
             Text(
                 text = "${gameState.score}",
                 style = MaterialTheme.typography.displayLarge,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.error
+                color = ErrorRed
             )
             
             Spacer(modifier = Modifier.height(16.dp))
             
             Text(
                 text = "到达关卡: ${gameState.currentLevel}",
-                style = MaterialTheme.typography.bodyLarge
+                style = MaterialTheme.typography.bodyLarge,
+                color = TextPrimary
             )
             
             Spacer(modifier = Modifier.height(8.dp))
@@ -641,7 +748,7 @@ private fun GameOverContent(
             Text(
                 text = "正确率: ${(gameState.correctCount.toFloat() / gameState.totalTrials * 100).toInt()}%",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = TextSecondary
             )
         }
     }
@@ -656,18 +763,61 @@ private fun GameOverContent(
             onClick = onBack,
             modifier = Modifier
                 .weight(1f)
-                .height(56.dp)
+                .height(56.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = ButtonDefaults.outlinedButtonColors(
+                contentColor = TextSecondary
+            )
         ) {
             Text("返回主界面", fontSize = 16.sp)
         }
         
-        Button(
+        CyberButton(
             onClick = onRestart,
+            text = "再玩一次",
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+private fun CyberButton(
+    onClick: () -> Unit,
+    text: String,
+    modifier: Modifier = Modifier
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .shadow(
+                elevation = 12.dp,
+                shape = RoundedCornerShape(16.dp),
+                spotColor = NeonCyan.copy(alpha = 0.4f)
+            ),
+        shape = RoundedCornerShape(16.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color.Transparent
+        ),
+        contentPadding = ButtonDefaults.ContentPadding
+    ) {
+        Box(
             modifier = Modifier
-                .weight(1f)
-                .height(56.dp)
+                .fillMaxSize()
+                .background(
+                    Brush.linearGradient(
+                        colors = listOf(GradientStart, GradientMiddle, GradientEnd)
+                    )
+                ),
+            contentAlignment = Alignment.Center
         ) {
-            Text("再玩一次", fontSize = 16.sp)
+            Text(
+                text = text,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
         }
     }
 }

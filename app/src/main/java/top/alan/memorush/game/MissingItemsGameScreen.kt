@@ -17,11 +17,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -32,6 +34,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -43,7 +46,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
@@ -55,6 +62,21 @@ import top.alan.memorush.model.GamePhase
 import top.alan.memorush.model.ItemShape
 import top.alan.memorush.model.MissingItemsGameState
 import top.alan.memorush.model.SceneItem
+import top.alan.memorush.ui.theme.CardBackground
+import top.alan.memorush.ui.theme.DarkBackground
+import top.alan.memorush.ui.theme.ErrorRed
+import top.alan.memorush.ui.theme.GlowPink
+import top.alan.memorush.ui.theme.GlowPurple
+import top.alan.memorush.ui.theme.GradientEnd
+import top.alan.memorush.ui.theme.GradientMiddle
+import top.alan.memorush.ui.theme.GradientStart
+import top.alan.memorush.ui.theme.NeonCyan
+import top.alan.memorush.ui.theme.NeonPurple
+import top.alan.memorush.ui.theme.SuccessGreen
+import top.alan.memorush.ui.theme.TextMuted
+import top.alan.memorush.ui.theme.TextPrimary
+import top.alan.memorush.ui.theme.TextSecondary
+import top.alan.memorush.ui.theme.WarningOrange
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -66,25 +88,34 @@ fun MissingItemsGameScreen(
     val gameState by viewModel.gameState.collectAsState()
     
     Scaffold(
+        containerColor = DarkBackground,
         topBar = {
             TopAppBar(
                 title = {
                     Text(
                         text = "消失的物品",
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            shadow = Shadow(
+                                color = NeonCyan.copy(alpha = 0.5f),
+                                offset = Offset(0f, 0f),
+                                blurRadius = 10f
+                            )
+                        )
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "返回"
+                            contentDescription = "返回",
+                            tint = TextPrimary
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    containerColor = DarkBackground,
+                    titleContentColor = TextPrimary
                 )
             )
         }
@@ -93,7 +124,16 @@ fun MissingItemsGameScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(16.dp),
+                .padding(16.dp)
+                .background(
+                    Brush.radialGradient(
+                        colors = listOf(
+                            NeonPurple.copy(alpha = 0.1f),
+                            Color.Transparent
+                        ),
+                        radius = 800f
+                    )
+                ),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             when (gameState.gamePhase) {
@@ -148,7 +188,8 @@ private fun IdleContent(
     Text(
         text = "消失的物品",
         style = MaterialTheme.typography.headlineMedium,
-        fontWeight = FontWeight.Bold
+        fontWeight = FontWeight.Bold,
+        color = TextPrimary
     )
     
     Spacer(modifier = Modifier.height(8.dp))
@@ -156,15 +197,24 @@ private fun IdleContent(
     Text(
         text = "记住场景中的物品，找出消失的那些",
         style = MaterialTheme.typography.bodyLarge,
-        color = MaterialTheme.colorScheme.onSurfaceVariant
+        color = TextSecondary
     )
     
     Spacer(modifier = Modifier.height(24.dp))
     
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(
+                width = 1.dp,
+                brush = Brush.linearGradient(
+                    colors = listOf(GlowPurple.copy(alpha = 0.3f), GlowPink.copy(alpha = 0.2f))
+                ),
+                shape = RoundedCornerShape(16.dp)
+            ),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = CardBackground
         )
     ) {
         Column(
@@ -173,7 +223,8 @@ private fun IdleContent(
         ) {
             Text(
                 text = "物品数量: ${gameState.totalItems}",
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleMedium,
+                color = NeonCyan
             )
             
             Slider(
@@ -181,14 +232,20 @@ private fun IdleContent(
                 onValueChange = { onTotalItemsChange(it.toInt()) },
                 valueRange = 3f..12f,
                 steps = 8,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = SliderDefaults.colors(
+                    thumbColor = NeonCyan,
+                    activeTrackColor = NeonCyan,
+                    inactiveTrackColor = NeonCyan.copy(alpha = 0.2f)
+                )
             )
             
             Spacer(modifier = Modifier.height(16.dp))
             
             Text(
                 text = "消失数量: ${gameState.missingCount}",
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleMedium,
+                color = NeonCyan
             )
             
             Slider(
@@ -196,14 +253,20 @@ private fun IdleContent(
                 onValueChange = { onMissingCountChange(it.toInt()) },
                 valueRange = 1f..4f,
                 steps = 2,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = SliderDefaults.colors(
+                    thumbColor = NeonCyan,
+                    activeTrackColor = NeonCyan,
+                    inactiveTrackColor = NeonCyan.copy(alpha = 0.2f)
+                )
             )
             
             Spacer(modifier = Modifier.height(16.dp))
             
             Text(
                 text = "观察时间: ${gameState.observationTime / 1000} 秒",
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleMedium,
+                color = NeonCyan
             )
             
             Slider(
@@ -211,21 +274,22 @@ private fun IdleContent(
                 onValueChange = { onObservationTimeChange(it.toLong()) },
                 valueRange = 2000f..10000f,
                 steps = 7,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = SliderDefaults.colors(
+                    thumbColor = NeonCyan,
+                    activeTrackColor = NeonCyan,
+                    inactiveTrackColor = NeonCyan.copy(alpha = 0.2f)
+                )
             )
         }
     }
     
     Spacer(modifier = Modifier.height(24.dp))
     
-    Button(
+    CyberButton(
         onClick = onStartGame,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp)
-    ) {
-        Text("开始游戏", fontSize = 18.sp)
-    }
+        text = "开始游戏"
+    )
 }
 
 @Composable
@@ -238,12 +302,13 @@ private fun ColumnScope.ObservationContent(
     ) {
         Text(
             text = "关卡 ${gameState.currentLevel}",
-            style = MaterialTheme.typography.titleMedium
+            style = MaterialTheme.typography.titleMedium,
+            color = TextSecondary
         )
         Text(
             text = "得分: ${gameState.score}",
             style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary
+            color = NeonCyan
         )
     }
     
@@ -252,7 +317,7 @@ private fun ColumnScope.ObservationContent(
     Text(
         text = "记住这些物品！",
         style = MaterialTheme.typography.titleLarge,
-        color = MaterialTheme.colorScheme.primary,
+        color = NeonCyan,
         fontWeight = FontWeight.Bold
     )
     
@@ -271,7 +336,7 @@ private fun ColumnScope.ObservationContent(
     
     CircularProgressIndicator(
         modifier = Modifier.size(48.dp),
-        color = MaterialTheme.colorScheme.primary
+        color = NeonCyan
     )
     
     Spacer(modifier = Modifier.height(16.dp))
@@ -279,7 +344,7 @@ private fun ColumnScope.ObservationContent(
     Text(
         text = "观察中...",
         style = MaterialTheme.typography.bodyLarge,
-        color = MaterialTheme.colorScheme.onSurfaceVariant
+        color = TextSecondary
     )
 }
 
@@ -296,12 +361,13 @@ private fun ColumnScope.GameContent(
     ) {
         Text(
             text = "关卡 ${gameState.currentLevel}",
-            style = MaterialTheme.typography.titleMedium
+            style = MaterialTheme.typography.titleMedium,
+            color = TextSecondary
         )
         Text(
             text = "得分: ${gameState.score}",
             style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary
+            color = NeonCyan
         )
     }
     
@@ -315,16 +381,16 @@ private fun ColumnScope.GameContent(
         Text(
             text = "找出 ${gameState.missingCount} 个消失的物品",
             style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.secondary
+            color = GlowPurple
         )
         
         Text(
             text = "剩余机会: ${gameState.attemptsRemaining}",
             style = MaterialTheme.typography.bodyMedium,
             color = if (gameState.attemptsRemaining <= 1) 
-                MaterialTheme.colorScheme.error 
+                ErrorRed 
             else 
-                MaterialTheme.colorScheme.onSurfaceVariant
+                TextSecondary
         )
     }
     
@@ -338,11 +404,11 @@ private fun ColumnScope.GameContent(
         Text(
             text = "已找到: ${gameState.foundItems.size} / ${gameState.missingItems.size}",
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.primary
+            color = NeonCyan
         )
         
         TextButton(onClick = onShowHint) {
-            Text("提示 (-5分)")
+            Text("提示 (-5分)", color = WarningOrange)
         }
     }
     
@@ -378,7 +444,14 @@ private fun SceneDisplay(
             .fillMaxWidth()
             .height(300.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .background(CardBackground)
+            .border(
+                width = 1.dp,
+                brush = Brush.linearGradient(
+                    colors = listOf(NeonCyan.copy(alpha = 0.3f), NeonPurple.copy(alpha = 0.2f))
+                ),
+                shape = RoundedCornerShape(16.dp)
+            )
     ) {
         val widthPx = with(density) { maxWidth.toPx() }
         val heightPx = with(density) { maxHeight.toPx() }
@@ -420,7 +493,7 @@ private fun SceneDisplay(
                                 .offset { IntOffset(x, y) }
                                 .size(missingItem.size.dp)
                                 .clip(CircleShape)
-                                .border(3.dp, Color.Yellow, CircleShape)
+                                .border(3.dp, WarningOrange, CircleShape)
                         )
                     }
                 }
@@ -444,7 +517,7 @@ private fun ItemComposable(
             .background(item.color)
             .then(
                 if (isHighlighted) {
-                    Modifier.border(3.dp, Color.Yellow, CircleShape)
+                    Modifier.border(3.dp, WarningOrange, CircleShape)
                 } else {
                     Modifier
                 }
@@ -551,15 +624,29 @@ private fun LevelCompleteContent(
         text = "关卡完成！",
         style = MaterialTheme.typography.headlineMedium,
         fontWeight = FontWeight.Bold,
-        color = MaterialTheme.colorScheme.primary
+        color = NeonCyan
     )
     
     Spacer(modifier = Modifier.height(24.dp))
     
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = 12.dp,
+                shape = RoundedCornerShape(20.dp),
+                spotColor = NeonCyan.copy(alpha = 0.3f)
+            )
+            .border(
+                width = 1.dp,
+                brush = Brush.linearGradient(
+                    colors = listOf(NeonCyan.copy(alpha = 0.5f), GlowPurple.copy(alpha = 0.3f))
+                ),
+                shape = RoundedCornerShape(20.dp)
+            ),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
+            containerColor = CardBackground
         )
     ) {
         Column(
@@ -570,35 +657,33 @@ private fun LevelCompleteContent(
         ) {
             Text(
                 text = "得分",
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleMedium,
+                color = TextMuted
             )
             
             Text(
                 text = "${gameState.score}",
                 style = MaterialTheme.typography.displayLarge,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
+                color = NeonCyan
             )
             
             Spacer(modifier = Modifier.height(16.dp))
             
             Text(
                 text = "你找到了所有 ${gameState.missingCount} 个消失的物品！",
-                style = MaterialTheme.typography.bodyLarge
+                style = MaterialTheme.typography.bodyLarge,
+                color = TextPrimary
             )
         }
     }
     
     Spacer(modifier = Modifier.height(24.dp))
     
-    Button(
+    CyberButton(
         onClick = onNextLevel,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp)
-    ) {
-        Text("下一关", fontSize = 18.sp)
-    }
+        text = "下一关"
+    )
 }
 
 @Composable
@@ -610,15 +695,30 @@ private fun GameOverContent(
     Text(
         text = "游戏结束",
         style = MaterialTheme.typography.headlineMedium,
-        fontWeight = FontWeight.Bold
+        fontWeight = FontWeight.Bold,
+        color = TextPrimary
     )
     
     Spacer(modifier = Modifier.height(24.dp))
     
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = 16.dp,
+                shape = RoundedCornerShape(20.dp),
+                spotColor = ErrorRed.copy(alpha = 0.3f)
+            )
+            .border(
+                width = 1.dp,
+                brush = Brush.linearGradient(
+                    colors = listOf(ErrorRed.copy(alpha = 0.5f), GlowPink.copy(alpha = 0.3f))
+                ),
+                shape = RoundedCornerShape(20.dp)
+            ),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.errorContainer
+            containerColor = CardBackground
         )
     ) {
         Column(
@@ -629,21 +729,23 @@ private fun GameOverContent(
         ) {
             Text(
                 text = "最终得分",
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleMedium,
+                color = TextMuted
             )
             
             Text(
                 text = "${gameState.score}",
                 style = MaterialTheme.typography.displayLarge,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.error
+                color = ErrorRed
             )
             
             Spacer(modifier = Modifier.height(16.dp))
             
             Text(
                 text = "到达关卡: ${gameState.currentLevel}",
-                style = MaterialTheme.typography.bodyLarge
+                style = MaterialTheme.typography.bodyLarge,
+                color = TextPrimary
             )
             
             Spacer(modifier = Modifier.height(8.dp))
@@ -651,7 +753,7 @@ private fun GameOverContent(
             Text(
                 text = "找到物品: ${gameState.foundItems.size} / ${gameState.missingItems.size}",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = TextSecondary
             )
         }
     }
@@ -666,18 +768,61 @@ private fun GameOverContent(
             onClick = onBack,
             modifier = Modifier
                 .weight(1f)
-                .height(56.dp)
+                .height(56.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = ButtonDefaults.outlinedButtonColors(
+                contentColor = TextSecondary
+            )
         ) {
             Text("返回主界面", fontSize = 16.sp)
         }
         
-        Button(
+        CyberButton(
             onClick = onRestart,
+            text = "再玩一次",
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+private fun CyberButton(
+    onClick: () -> Unit,
+    text: String,
+    modifier: Modifier = Modifier
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .shadow(
+                elevation = 12.dp,
+                shape = RoundedCornerShape(16.dp),
+                spotColor = NeonCyan.copy(alpha = 0.4f)
+            ),
+        shape = RoundedCornerShape(16.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color.Transparent
+        ),
+        contentPadding = ButtonDefaults.ContentPadding
+    ) {
+        Box(
             modifier = Modifier
-                .weight(1f)
-                .height(56.dp)
+                .fillMaxSize()
+                .background(
+                    Brush.linearGradient(
+                        colors = listOf(GradientStart, GradientMiddle, GradientEnd)
+                    )
+                ),
+            contentAlignment = Alignment.Center
         ) {
-            Text("再玩一次", fontSize = 16.sp)
+            Text(
+                text = text,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
         }
     }
 }

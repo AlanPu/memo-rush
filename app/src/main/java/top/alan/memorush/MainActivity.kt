@@ -27,6 +27,7 @@ import top.alan.memorush.game.GridMemoryGameScreen
 import top.alan.memorush.game.MissingItemsGameScreen
 import top.alan.memorush.game.NBackGameScreen
 import top.alan.memorush.game.SimonSaysGameScreen
+import top.alan.memorush.game.StroopTaskGameScreen
 import top.alan.memorush.model.GameType
 import top.alan.memorush.ui.theme.MemoRushTheme
 
@@ -88,10 +89,19 @@ fun AppNavigation(
                     )
                 }
                 GameType.N_BACK -> {
-                    NBackGameScreen()
+                    NBackGameScreen(
+                        onBack = { navController.popBackStack() }
+                    )
                 }
                 GameType.MISSING_ITEMS -> {
-                    MissingItemsGameScreen()
+                    MissingItemsGameScreen(
+                        onBack = { navController.popBackStack() }
+                    )
+                }
+                GameType.STROOP_TASK -> {
+                    StroopTaskGameScreen(
+                        onBack = { navController.popBackStack() }
+                    )
                 }
                 else -> {
                     GamePlaceholderScreen(

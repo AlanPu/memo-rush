@@ -7,4 +7,6 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <!-- 应用图标背景色 - 与大脑图标协调的深蓝色 -->
+    <color name="ic_launcher_background">#FF1A237E</color>
 </resources>

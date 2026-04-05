@@ -21,18 +21,26 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -50,43 +58,72 @@ import top.alan.memorush.model.NBackGameState
 import top.alan.memorush.model.NBackStimulus
 import top.alan.memorush.model.StimulusMode
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NBackGameScreen(
+    onBack: () -> Unit,
     viewModel: NBackGameViewModel = viewModel()
 ) {
     val gameState by viewModel.gameState.collectAsState()
     
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        when (gameState.gamePhase) {
-            GamePhase.IDLE -> {
-                IdleContent(
-                    gameState = gameState,
-                    onStartGame = { viewModel.startGame() },
-                    onNLevelChange = { viewModel.setNLevel(it) },
-                    onModeChange = { viewModel.setStimulusMode(it) },
-                    onTrialsChange = { viewModel.setTotalTrials(it) }
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = "N-Back 任务",
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "返回"
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 )
+            )
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            when (gameState.gamePhase) {
+                GamePhase.IDLE -> {
+                    IdleContent(
+                        gameState = gameState,
+                        onStartGame = { viewModel.startGame() },
+                        onNLevelChange = { viewModel.setNLevel(it) },
+                        onModeChange = { viewModel.setStimulusMode(it) },
+                        onTrialsChange = { viewModel.setTotalTrials(it) }
+                    )
+                }
+                GamePhase.SHOWING_SEQUENCE -> {
+                    GameContent(
+                        gameState = gameState,
+                        onMatchClick = { viewModel.onMatchResponse() },
+                        onNoMatchClick = { viewModel.onNoMatchResponse() }
+                    )
+                }
+                GamePhase.GAME_OVER -> {
+                    GameOverContent(
+                        gameState = gameState,
+                        onRestart = { viewModel.startGame() },
+                        onReset = { viewModel.resetGame() },
+                        onBack = onBack
+                    )
+                }
+                else -> {}
             }
-            GamePhase.SHOWING_SEQUENCE -> {
-                GameContent(
-                    gameState = gameState,
-                    onMatchClick = { viewModel.onMatchResponse() },
-                    onNoMatchClick = { viewModel.onNoMatchResponse() }
-                )
-            }
-            GamePhase.GAME_OVER -> {
-                GameOverContent(
-                    gameState = gameState,
-                    onRestart = { viewModel.startGame() },
-                    onReset = { viewModel.resetGame() }
-                )
-            }
-            else -> {}
         }
     }
 }
@@ -454,7 +491,8 @@ private fun DualStimulusDisplay(
 private fun GameOverContent(
     gameState: NBackGameState,
     onRestart: () -> Unit,
-    onReset: () -> Unit
+    onReset: () -> Unit,
+    onBack: () -> Unit
 ) {
     val accuracy = if (gameState.totalResponses > 0) {
         (gameState.correctResponses.toFloat() / gameState.totalResponses * 100).toInt()
@@ -570,12 +608,12 @@ private fun GameOverContent(
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         OutlinedButton(
-            onClick = onReset,
+            onClick = onBack,
             modifier = Modifier
                 .weight(1f)
                 .height(56.dp)
         ) {
-            Text("返回设置", fontSize = 16.sp)
+            Text("返回主界面", fontSize = 16.sp)
         }
         
         Button(

@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import top.alan.memorush.BuildConfig
 import top.alan.memorush.model.GameType
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -51,7 +52,16 @@ fun GameSelectionScreen(
             textAlign = TextAlign.Center
         )
 
-        Spacer(modifier = Modifier.height(48.dp))
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "v${BuildConfig.VERSION_NAME}",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(40.dp))
 
         ExposedDropdownMenuBox(
             expanded = expanded,

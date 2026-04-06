@@ -50,6 +50,26 @@ android {
     }
 }
 
+tasks.register("renameReleaseApk") {
+    dependsOn("assembleRelease")
+    doLast {
+        val versionName = android.defaultConfig.versionName
+        val sourceFile = file("build/outputs/apk/release/app-release.apk")
+        val destFile = file("build/outputs/apk/release/memo-rush-v${versionName}.apk")
+        if (sourceFile.exists()) {
+            sourceFile.renameTo(destFile)
+            println("APK renamed to: ${destFile.name}")
+        }
+    }
+}
+
+// 为 packageRelease 任务添加最终化任务
+tasks.withType<com.android.build.gradle.tasks.PackageApplication> {
+    if (name == "packageRelease") {
+        finalizedBy("renameReleaseApk")
+    }
+}
+
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
